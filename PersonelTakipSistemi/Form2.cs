@@ -20,7 +20,7 @@ namespace PersonelTakipSistemi
         {
             InitializeComponent();
         }
-        OleDbConnection baglantim = new OleDbConnection("Provider=Microsoft.Ace.OleDb.12.0;Data Source=personel.accdb");
+        OleDbConnection baglantim = new OleDbConnection(@"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb");
 
         private void KullanicilariListele()
         {
@@ -62,6 +62,7 @@ namespace PersonelTakipSistemi
                 if (baglantim.State == ConnectionState.Open) baglantim.Close();
             }
         }
+
         private void PersonelleriListele()
         {
             try
@@ -101,6 +102,9 @@ namespace PersonelTakipSistemi
                 dataGridView2.Columns.Add("maasi", "Maaşı");
                 dataGridView2.Columns["maasi"].DataPropertyName = "maasi";
 
+                dataGridView2.Columns.Add("giristarihi", "Giriş Tarihi");
+                dataGridView2.Columns["giristarihi"].DataPropertyName = "giristarihi";
+
                 dataGridView2.DataSource = verikumesi.Tables[0];
                 baglantim.Close();
             }
@@ -110,6 +114,7 @@ namespace PersonelTakipSistemi
                 if (baglantim.State == ConnectionState.Open) baglantim.Close();
             }
         }
+
         private void topPage1_temizle()
         {
             tcnotextbox.Clear();
@@ -118,7 +123,10 @@ namespace PersonelTakipSistemi
             textBox4.Clear();
             textBox5.Clear();
             textBox6.Clear();
+            errorProvider1.Clear();
+            progressBar1.Value = 0;
         }
+
         private void topPage2_temizle()
         {
             pictureBox2.Image = null;
@@ -129,9 +137,16 @@ namespace PersonelTakipSistemi
             comboBox1.SelectedIndex = -1;
             comboBox2.SelectedIndex = -1;
             comboBox3.SelectedIndex = -1;
+
+            dateTimePicker2.MinDate = DateTime.Today;
+            dateTimePicker2.Value = DateTime.Now;
         }
+
         private void Form2_Load(object sender, EventArgs e)
         {
+            dataGridView1.ReadOnly = true;
+            dataGridView2.ReadOnly = true;
+
             pictureBox1.Height = 150;
             pictureBox1.Width = 150;
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -208,13 +223,16 @@ namespace PersonelTakipSistemi
             dateTimePicker1.MinDate = new DateTime(1960, 1, 1);
             dateTimePicker1.MaxDate = new DateTime(yil - 18, ay, gun);
             dateTimePicker1.Format = DateTimePickerFormat.Short;
+
+            // Geçmiş tarihi seçmeyi engelliyorum
+            dateTimePicker2.MinDate = DateTime.Today;
+
             radioButton3.Checked = true;
             PersonelleriListele();
             this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
             this.Text = "Yönetici Paneli...";
             this.StartPosition = FormStartPosition.CenterScreen;
         }
-
 
         //Tc Kimlik No Textbox
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -228,6 +246,7 @@ namespace PersonelTakipSistemi
                 errorProvider1.Clear();
             }
         }
+
         private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (((int)e.KeyChar >= 48 && (int)e.KeyChar <= 57) || (int)e.KeyChar == 8)
@@ -262,6 +281,7 @@ namespace PersonelTakipSistemi
             else
                 errorProvider1.Clear();
         }
+
         private void textBox4_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (char.IsLetter(e.KeyChar) == true || char.IsControl(e.KeyChar) == true || char.IsDigit(e.KeyChar) == true)
@@ -337,8 +357,7 @@ namespace PersonelTakipSistemi
                 errorProvider1.Clear();
         }
 
-
-        //Kaydet Butonu
+        // Kaydet Butonu
         private void button1_Click(object sender, EventArgs e)
         {
             string yetki = "";
@@ -356,16 +375,19 @@ namespace PersonelTakipSistemi
 
             if (kayitkontrol == false)
             {
-                if (tcnotextbox.Text.Length < 11 || tcnotextbox.Text == "") label1.ForeColor = Color.Red; else label1.ForeColor = Color.Black;
-                if (textBox2.Text.Length < 2 || textBox2.Text == "") label2.ForeColor = Color.Red; else label2.ForeColor = Color.Black;
-                if (textBox3.Text.Length < 2 || textBox3.Text == "") label3.ForeColor = Color.Red; else label3.ForeColor = Color.Black;
-                if (textBox4.Text.Length < 8 || textBox4.Text == "") label5.ForeColor = Color.Red; else label5.ForeColor = Color.Black;
-                if (textBox5.Text == "" || parola_skoru < 70) label6.ForeColor = Color.Red; else label6.ForeColor = Color.Black;
-                if (textBox6.Text == "" || textBox5.Text != textBox6.Text) label7.ForeColor = Color.Red; else label7.ForeColor = Color.Black;
+                if (tcnotextbox.Text.Length < 11 || tcnotextbox.Text == "") label1.ForeColor = Color.Red; else label1.ForeColor = Color.FromArgb(226, 232, 240);
+                if (textBox2.Text.Length < 2 || textBox2.Text == "") label2.ForeColor = Color.Red; else label2.ForeColor = Color.FromArgb(226, 232, 240);
+                if (textBox3.Text.Length < 2 || textBox3.Text == "") label3.ForeColor = Color.Red; else label3.ForeColor = Color.FromArgb(226, 232, 240);
+                if (textBox4.Text.Length < 8 || textBox4.Text == "") label5.ForeColor = Color.Red; else label5.ForeColor = Color.FromArgb(226, 232, 240);
+                if (textBox5.Text == "" || parola_skoru < 70) label6.ForeColor = Color.Red; else label6.ForeColor = Color.FromArgb(226, 232, 240);
+                if (textBox6.Text == "" || textBox5.Text != textBox6.Text) label7.ForeColor = Color.Red; else label7.ForeColor = Color.FromArgb(226, 232, 240);
 
-                if (tcnotextbox.Text.Length == 11 && tcnotextbox.Text != "" && textBox2.Text != "" && textBox2.Text.Length > 1 &&
-                    textBox3.Text != "" && textBox3.Text.Length > 1 && textBox4.Text != "" && textBox5.Text != "" &&
-                    textBox6.Text != "" && textBox5.Text == textBox6.Text && parola_skoru >= 70)
+                if (tcnotextbox.Text.Length == 11 && tcnotextbox.Text != "" &&
+                    textBox2.Text != "" && textBox2.Text.Length > 1 &&
+                    textBox3.Text != "" && textBox3.Text.Length > 1 &&
+                    textBox4.Text != "" && textBox4.Text.Length >= 8 &&
+                    textBox5.Text != "" && textBox6.Text != "" &&
+                    textBox5.Text == textBox6.Text && parola_skoru >= 70)
                 {
                     if (radioButton1.Checked == true) yetki = "Kullanıcı";
                     else if (radioButton2.Checked == true) yetki = "Yönetici";
@@ -401,12 +423,12 @@ namespace PersonelTakipSistemi
         private void button2_Click(object sender, EventArgs e)
         {
             string yetki = "";
-            if (tcnotextbox.Text.Length < 11 || tcnotextbox.Text == "") label1.ForeColor = Color.Red; else label1.ForeColor = Color.Black;
-            if (textBox2.Text.Length < 2 || textBox2.Text == "") label2.ForeColor = Color.Red; else label2.ForeColor = Color.Black;
-            if (textBox3.Text.Length < 2 || textBox3.Text == "") label3.ForeColor = Color.Red; else label3.ForeColor = Color.Black;
-            if (textBox4.Text.Length < 8 || textBox4.Text == "") label5.ForeColor = Color.Red; else label5.ForeColor = Color.Black;
-            if (textBox5.Text == "" || parola_skoru < 70) label6.ForeColor = Color.Red; else label6.ForeColor = Color.Black;
-            if (textBox6.Text == "" || textBox5.Text != textBox6.Text) label7.ForeColor = Color.Red; else label7.ForeColor = Color.Black;
+            if (tcnotextbox.Text.Length < 11 || tcnotextbox.Text == "") label1.ForeColor = Color.Red; else label1.ForeColor = Color.FromArgb(226, 232, 240);
+            if (textBox2.Text.Length < 2 || textBox2.Text == "") label2.ForeColor = Color.Red; else label2.ForeColor = Color.FromArgb(226, 232, 240);
+            if (textBox3.Text.Length < 2 || textBox3.Text == "") label3.ForeColor = Color.Red; else label3.ForeColor = Color.FromArgb(226, 232, 240);
+            if (textBox4.Text.Length < 8 || textBox4.Text == "") label5.ForeColor = Color.Red; else label5.ForeColor = Color.FromArgb(226, 232, 240);
+            if (textBox5.Text == "" || parola_skoru < 70) label6.ForeColor = Color.Red; else label6.ForeColor = Color.FromArgb(226, 232, 240);
+            if (textBox6.Text == "" || textBox5.Text != textBox6.Text) label7.ForeColor = Color.Red; else label7.ForeColor = Color.FromArgb(226, 232, 240);
 
             if (tcnotextbox.Text.Length == 11 && tcnotextbox.Text != "" && textBox2.Text != "" && textBox2.Text.Length > 1 &&
                 textBox3.Text != "" && textBox3.Text.Length > 1 && textBox4.Text != "" && textBox5.Text != "" &&
@@ -516,9 +538,7 @@ namespace PersonelTakipSistemi
             }
         }
 
-
         //-----------------------Personel İşlemleri--------------------------------//
-
 
         //Gözat Butonu
         private void button6_Click(object sender, EventArgs e)
@@ -564,13 +584,27 @@ namespace PersonelTakipSistemi
                         catch { pictureBox2.Image = null; }
                     }
 
+                    if (kayitokuma.GetValue(3).ToString() == "Bay") radioButton3.Checked = true; else radioButton4.Checked = true;
+
+                    dateTimePicker1.Text = kayitokuma.GetValue(5).ToString();
+
+                    DateTime girisTarihi;
+                    if (DateTime.TryParse(kayitokuma.GetValue(9).ToString(), out girisTarihi))
+                    {
+                        if (girisTarihi < DateTime.Today)
+                            dateTimePicker2.MinDate = girisTarihi;
+                        else
+                            dateTimePicker2.MinDate = DateTime.Today;
+                    }
+                    dateTimePicker2.Text = kayitokuma.GetValue(9).ToString();
+
                     maskedTextBox2.Text = kayitokuma.GetValue(1).ToString();
                     maskedTextBox3.Text = kayitokuma.GetValue(2).ToString();
-                    if (kayitokuma.GetValue(3).ToString() == "Bay") radioButton3.Checked = true; else radioButton4.Checked = true;
+
                     comboBox1.Text = kayitokuma.GetValue(4).ToString();
-                    dateTimePicker1.Text = kayitokuma.GetValue(5).ToString();
                     comboBox2.Text = kayitokuma.GetValue(6).ToString();
                     comboBox3.Text = kayitokuma.GetValue(7).ToString();
+
                     maskedTextBox4.Text = kayitokuma.GetValue(8).ToString();
                     break;
                 }
@@ -592,20 +626,19 @@ namespace PersonelTakipSistemi
         {
             string cinsiyet = "";
 
-            if (pictureBox2.Image == null) button6.ForeColor = Color.Red; else button6.ForeColor = Color.Black;
-            if (maskedTextBox1.MaskCompleted == false) label13.ForeColor = Color.Red; else label13.ForeColor = Color.Black;
-            if (maskedTextBox2.MaskCompleted == false) label14.ForeColor = Color.Red; else label14.ForeColor = Color.Black;
-            if (maskedTextBox3.MaskCompleted == false) label15.ForeColor = Color.Red; else label15.ForeColor = Color.Black;
-            if (comboBox1.Text == "") label17.ForeColor = Color.Red; else label17.ForeColor = Color.Black;
-            if (comboBox2.Text == "") label19.ForeColor = Color.Red; else label19.ForeColor = Color.Black;
-            if (comboBox3.Text == "") label20.ForeColor = Color.Red; else label20.ForeColor = Color.Black;
+            if (maskedTextBox1.MaskCompleted == false) label13.ForeColor = Color.Red; else label13.ForeColor = Color.FromArgb(226, 232, 240);
+            if (maskedTextBox2.MaskCompleted == false) label14.ForeColor = Color.Red; else label14.ForeColor = Color.FromArgb(226, 232, 240);
+            if (maskedTextBox3.MaskCompleted == false) label15.ForeColor = Color.Red; else label15.ForeColor = Color.FromArgb(226, 232, 240);
+            if (comboBox1.Text == "") label17.ForeColor = Color.Red; else label17.ForeColor = Color.FromArgb(226, 232, 240);
+            if (comboBox2.Text == "") label19.ForeColor = Color.Red; else label19.ForeColor = Color.FromArgb(226, 232, 240);
+            if (comboBox3.Text == "") label20.ForeColor = Color.Red; else label20.ForeColor = Color.FromArgb(226, 232, 240);
 
             if (maskedTextBox4.MaskCompleted == false || (maskedTextBox4.Text != "" && int.Parse(maskedTextBox4.Text) < 1000))
                 label21.ForeColor = Color.Red;
             else
-                label21.ForeColor = Color.Black;
+                label21.ForeColor = Color.FromArgb(226, 232, 240);
 
-            if (pictureBox2.Image != null && maskedTextBox1.MaskCompleted != false && maskedTextBox2.MaskCompleted != false && maskedTextBox3.MaskCompleted != false && comboBox1.Text != "" && comboBox2.Text != "" && comboBox3.Text != "" && label21.ForeColor == Color.Black)
+            if (pictureBox2.Image != null && maskedTextBox1.MaskCompleted != false && maskedTextBox2.MaskCompleted != false && maskedTextBox3.MaskCompleted != false && comboBox1.Text != "" && comboBox2.Text != "" && comboBox3.Text != "" && label21.ForeColor == Color.FromArgb(226, 232, 240))
             {
                 if (radioButton3.Checked == true) cinsiyet = "Bay";
                 else if (radioButton4.Checked == true) cinsiyet = "Bayan";
@@ -617,8 +650,8 @@ namespace PersonelTakipSistemi
                         maskedTextBox2.Text + "',soyad='" + maskedTextBox3.Text + "',cinsiyet='" +
                         cinsiyet + "',mezuniyet='" + comboBox1.Text + "',dogumtarihi='" +
                         dateTimePicker1.Text + "',gorevi='" + comboBox2.Text + "',gorevyeri='" +
-                        comboBox3.Text + "',maasi='" + maskedTextBox4.Text + "' where tcno='" +
-                        maskedTextBox1.Text + "'", baglantim);
+                        comboBox3.Text + "',maasi='" + maskedTextBox4.Text + "', giristarihi='" +
+                        dateTimePicker2.Text + "' where tcno='" + maskedTextBox1.Text + "'", baglantim);
                     guncellekomutu.ExecuteNonQuery();
                     baglantim.Close();
 
@@ -629,6 +662,10 @@ namespace PersonelTakipSistemi
 
                     try
                     {
+                        if (System.IO.File.Exists(dosyaYolu))
+                        {
+                            System.IO.File.Delete(dosyaYolu);
+                        }
                         pictureBox2.Image.Save(dosyaYolu);
                     }
                     catch (Exception imageHata)
@@ -671,20 +708,52 @@ namespace PersonelTakipSistemi
 
             if (kayitkontrol == false)
             {
-                if (pictureBox2.Image == null) button6.ForeColor = Color.Red; else button6.ForeColor = Color.Black;
-                if (maskedTextBox1.MaskCompleted == false) label13.ForeColor = Color.Red; else label13.ForeColor = Color.Black;
-                if (maskedTextBox2.MaskCompleted == false) label14.ForeColor = Color.Red; else label14.ForeColor = Color.Black;
-                if (maskedTextBox3.MaskCompleted == false) label15.ForeColor = Color.Red; else label15.ForeColor = Color.Black;
-                if (comboBox1.Text == "") label17.ForeColor = Color.Red; else label17.ForeColor = Color.Black;
-                if (comboBox2.Text == "") label19.ForeColor = Color.Red; else label19.ForeColor = Color.Black;
-                if (comboBox3.Text == "") label20.ForeColor = Color.Red; else label20.ForeColor = Color.Black;
+                if (pictureBox2.Image == null)
+                    button6.ForeColor = Color.Red;
+                else
+                    button6.ForeColor = Color.Black;
+
+                if (maskedTextBox1.MaskCompleted == false)
+                    label13.ForeColor = Color.Red;
+                else
+                    label13.ForeColor = Color.FromArgb(226, 232, 240);
+
+                if (maskedTextBox2.MaskCompleted == false)
+                    label14.ForeColor = Color.Red;
+                else
+                    label14.ForeColor = Color.FromArgb(226, 232, 240);
+
+                if (maskedTextBox3.MaskCompleted == false)
+                    label15.ForeColor = Color.Red;
+                else
+                    label15.ForeColor = Color.FromArgb(226, 232, 240);
+
+                if (comboBox1.Text == "")
+                    label17.ForeColor = Color.Red;
+                else
+                    label17.ForeColor = Color.FromArgb(226, 232, 240);
+
+                if (comboBox2.Text == "")
+                    label19.ForeColor = Color.Red;
+                else
+                    label19.ForeColor = Color.FromArgb(226, 232, 240);
+
+                if (comboBox3.Text == "")
+                    label20.ForeColor = Color.Red;
+                else
+                    label20.ForeColor = Color.FromArgb(226, 232, 240);
+
+                if (dateTimePicker2.Value.Date < DateTime.Today)
+                    label23.ForeColor = Color.Red;
+                else
+                    label23.ForeColor = Color.FromArgb(226, 232, 240);
 
                 if (maskedTextBox4.Text == "" || (maskedTextBox4.Text != "" && int.Parse(maskedTextBox4.Text) < 1000))
                     label21.ForeColor = Color.Red;
                 else
-                    label21.ForeColor = Color.Black;
+                    label21.ForeColor = Color.FromArgb(226, 232, 240);
 
-                if (pictureBox2.Image != null && maskedTextBox1.MaskCompleted != false && maskedTextBox2.MaskCompleted != false && maskedTextBox3.MaskCompleted != false && comboBox1.Text != "" && comboBox2.Text != "" && comboBox3.Text != "" && label21.ForeColor == Color.Black)
+                if (pictureBox2.Image != null && maskedTextBox1.MaskCompleted != false && maskedTextBox2.MaskCompleted != false && maskedTextBox3.MaskCompleted != false && comboBox1.Text != "" && comboBox2.Text != "" && comboBox3.Text != "" && label21.ForeColor != Color.Red)
                 {
                     if (radioButton3.Checked == true) cinsiyet = "Bay";
                     else if (radioButton4.Checked == true) cinsiyet = "Bayan";
@@ -692,7 +761,7 @@ namespace PersonelTakipSistemi
                     try
                     {
                         baglantim.Open();
-                        OleDbCommand eklekomutu = new OleDbCommand("insert into personeller values('" + maskedTextBox1.Text + "','" + maskedTextBox2.Text + "','" + maskedTextBox3.Text + "','" + cinsiyet + "','" + comboBox1.Text + "','" + dateTimePicker1.Text + "','" + comboBox2.Text + "','" + comboBox3.Text + "','" + maskedTextBox4.Text + "')", baglantim);
+                        OleDbCommand eklekomutu = new OleDbCommand("insert into personeller (tcno, ad, soyad, cinsiyet, mezuniyet, dogumtarihi, gorevi, gorevyeri, maasi, giristarihi) values('" + maskedTextBox1.Text + "','" + maskedTextBox2.Text + "','" + maskedTextBox3.Text + "','" + cinsiyet + "','" + comboBox1.Text + "','" + dateTimePicker1.Text + "','" + comboBox2.Text + "','" + comboBox3.Text + "','" + maskedTextBox4.Text + "','" + dateTimePicker2.Text + "')", baglantim);
                         eklekomutu.ExecuteNonQuery();
                         baglantim.Close();
 
@@ -714,7 +783,7 @@ namespace PersonelTakipSistemi
                 }
                 else
                 {
-                    MessageBox.Show("Yazı rengi kırmızı olan alanları yeniden gözden geçiriniz!", "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Yazı rengi kırmızı olan alanları veya boş alanları yeniden gözden geçiriniz!", "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -794,7 +863,7 @@ namespace PersonelTakipSistemi
             Excel.Workbook calismaKitabi = excelDosya.Workbooks.Add(Missing);
             Excel.Worksheet calismaSayfasi = (Excel.Worksheet)calismaKitabi.Worksheets[1];
 
-            // 1. Aşama: DataGridView'deki Sütun Başlıklarını Excel'e Yazdır
+            // DataGridView'deki Sütun Başlıklarını Excel'e Yazdır
             for (int i = 0; i < dataGridView2.Columns.Count; i++)
             {
                 calismaSayfasi.Cells[1, i + 1] = dataGridView2.Columns[i].HeaderText;
@@ -813,8 +882,6 @@ namespace PersonelTakipSistemi
             // Yazılar hücrelere sığsın diye sütun genişliklerini otomatik ayarlıyo
             calismaSayfasi.Columns.AutoFit();
         }
-
-
 
         //Kullanıcı DataGridView
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -861,6 +928,17 @@ namespace PersonelTakipSistemi
 
                 comboBox1.Text = satir.Cells[4].Value.ToString();
                 dateTimePicker1.Text = satir.Cells[5].Value.ToString();
+
+                DateTime girisTarihi;
+                if (DateTime.TryParse(satir.Cells[9].Value.ToString(), out girisTarihi))
+                {
+                    if (girisTarihi < DateTime.Today)
+                        dateTimePicker2.MinDate = girisTarihi;
+                    else
+                        dateTimePicker2.MinDate = DateTime.Today;
+                }
+                dateTimePicker2.Text = satir.Cells[9].Value.ToString();
+
                 comboBox2.Text = satir.Cells[6].Value.ToString();
                 comboBox3.Text = satir.Cells[7].Value.ToString();
                 maskedTextBox4.Text = satir.Cells[8].Value.ToString();
@@ -884,6 +962,6 @@ namespace PersonelTakipSistemi
                     catch { pictureBox2.Image = null; }
                 }
             }
-        } 
+        }
     }
 }

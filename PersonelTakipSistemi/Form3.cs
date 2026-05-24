@@ -17,7 +17,7 @@ namespace PersonelTakipSistemi
         {
             InitializeComponent();
         }
-        OleDbConnection baglantim = new OleDbConnection("Provider=Microsoft.Ace.OleDb.12.0;Data Source=personel.accdb");
+        OleDbConnection baglantim = new OleDbConnection(@"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb");
         private void personelleri_goster()
         {
             try
@@ -38,6 +38,8 @@ namespace PersonelTakipSistemi
         }
         private void Form3_Load(object sender, EventArgs e)
         {
+            dataGridView1.ReadOnly = true;
+
             personelleri_goster();
             this.Text = "KULLANICI İŞLEMLERİ";
             label19.Text = Form1.adi + " " + Form1.soyadi;
@@ -78,11 +80,17 @@ namespace PersonelTakipSistemi
                     kayit_arama_durumu = true;
                     try
                     {
-                        pictureBox1.Image = Image.FromFile(Application.StartupPath + "\\personelresimler\\" + kayitokuma.GetValue(0).ToString() + ".jpg");
+                        using (Image img = Image.FromFile(Application.StartupPath + "\\personelresimler\\" + kayitokuma.GetValue(0).ToString() + ".jpg"))
+                        {
+                            pictureBox1.Image = new Bitmap(img);
+                        }
                     }
                     catch
                     {
-                        pictureBox1.Image = Image.FromFile(Application.StartupPath + "\\personelresimler\\resimyok.jpg");
+                        using (Image img = Image.FromFile(Application.StartupPath + "\\personelresimler\\resimyok.jpg"))
+                        {
+                            pictureBox1.Image = new Bitmap(img);
+                        }
                     }
 
                     label10.Text = kayitokuma.GetValue(1).ToString();

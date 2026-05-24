@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
+
+
 namespace PersonelTakipSistemi
 {
     public partial class Form1 : Form
@@ -19,9 +21,8 @@ namespace PersonelTakipSistemi
         {
             InitializeComponent();
         }
-        OleDbConnection baglantim = new OleDbConnection("Provider=Microsoft.Ace.OleDb.12.0;Data Source=personel.accdb");
+        OleDbConnection baglantim = new OleDbConnection(@"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb");
         public static string tcno, adi, soyadi, yetki;
-
 
         int hak = 3;
         private void Form1_Load(object sender, EventArgs e)
@@ -29,6 +30,7 @@ namespace PersonelTakipSistemi
             this.Text = "Kullanıcı Girişi";
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            this.ActiveControl = kullaniciaditextbox;
             parolatextbox.PasswordChar = '*';
         }
         bool durum = false;
@@ -36,7 +38,6 @@ namespace PersonelTakipSistemi
         {
             durum = false;
 
-            // Yetki seçilmemişse uyarı ver
             if (kullaniciradio.Checked == false && yoneticiradio.Checked == false)
             {
                 MessageBox.Show("Lütfen giriş yetkinizi (Yönetici/Kullanıcı) seçiniz!", "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -118,7 +119,7 @@ namespace PersonelTakipSistemi
                     Application.Exit();
                 }
 
-                // Eğer hala hakkı varsa uyarı verip sadece şifre ve id kutularını temizlesin
+                // Eğer hala hakkı varsa uyarı verip sadece şifre ve id kutularını temizliyoruz
                 if (hak > 0)
                 {
                     MessageBox.Show("Kullanıcı Adı, Şifre veya Yetki Yanlış!\nKalan Hakkınız: " + hak, "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
