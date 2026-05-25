@@ -71,7 +71,7 @@ namespace PersonelTakipSistemi
                 }
                 catch (Exception hatamsj)
                 {
-                    MessageBox.Show("Veritabanı bağlantı hatası: " + hatamsj.Message, "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Veritabanı bağlantı hatası: " + hatamsj.Message, "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     if (baglantim.State == ConnectionState.Open) baglantim.Close();
                 }
             }
@@ -86,7 +86,7 @@ namespace PersonelTakipSistemi
 
             if (durum == true)
             {
-                MessageBox.Show("Giriş Başarılı!", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Giriş Başarılı!", "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 if (yoneticiradio.Checked == true)
                 {
                     Form2 frm2 = new Form2();
@@ -131,7 +131,7 @@ namespace PersonelTakipSistemi
         }
         private void cikisbuton_Click(object sender, EventArgs e)
         {
-            DialogResult cevap = MessageBox.Show("Programdan çıkmak istediğinize emin misiniz?", "Çıkış", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult cevap = MessageBox.Show("Programdan çıkmak istediğinize emin misiniz?", "Personel Takip Sistemi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (cevap == DialogResult.Yes)
             {
                 Application.Exit();
