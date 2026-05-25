@@ -125,7 +125,7 @@ namespace PersonelTakipSistemi
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             int secilen_alan = dataGridView1.SelectedCells[0].RowIndex;
-            string tcno = dataGridView1.Rows[secilen_alan].Cells[0].Value.ToString();
+            string tcno = Convert.ToString(dataGridView1.Rows[secilen_alan].Cells[0].Value);
             maskedTextBox1.Text = tcno;
             button7.PerformClick();
         }
