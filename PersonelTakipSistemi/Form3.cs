@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,29 +17,32 @@ namespace PersonelTakipSistemi
         {
             InitializeComponent();
         }
-        OleDbConnection baglantim = new OleDbConnection(@"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb");
+
+        string baglantiCumlesi = @"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb";
+
         private void personelleri_goster()
         {
             try
             {
-                baglantim.Open();
-                OleDbDataAdapter personelleri_listele = new OleDbDataAdapter("select * from personeller", baglantim);
-                DataSet dshafiza = new DataSet();
-                personelleri_listele.Fill(dshafiza);
-                dataGridView1.DataSource = dshafiza.Tables[0];
-                baglantim.Close();
-                lblToplamPersonel.Text = "Toplam Personel Sayısı: " + dataGridView1.Rows.Count.ToString();
+                using (OleDbConnection baglantim = new OleDbConnection(baglantiCumlesi))
+                {
+                    baglantim.Open();
+                    OleDbDataAdapter personelleri_listele = new OleDbDataAdapter("select * from personeller", baglantim);
+                    DataSet dshafiza = new DataSet();
+                    personelleri_listele.Fill(dshafiza);
+                    dataGridView1.DataSource = dshafiza.Tables[0];
+                    lblToplamPersonel.Text = "Toplam Personel Sayısı: " + dataGridView1.Rows.Count.ToString();
+                }
             }
             catch (Exception hatamjs)
             {
                 MessageBox.Show(hatamjs.Message, "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                baglantim.Close();
             }
         }
+
         private void Form3_Load(object sender, EventArgs e)
         {
             dataGridView1.ReadOnly = true;
-
             personelleri_goster();
             this.Text = "KULLANICI İŞLEMLERİ";
             label19.Text = Form1.adi + " " + Form1.soyadi;
@@ -71,50 +74,53 @@ namespace PersonelTakipSistemi
             bool kayit_arama_durumu = false;
             if (maskedTextBox1.Text.Length == 11)
             {
-                baglantim.Open();
-                OleDbCommand selectsorgu = new OleDbCommand("select * from personeller where tcno='" + maskedTextBox1.Text + "'", baglantim);
-                OleDbDataReader kayitokuma = selectsorgu.ExecuteReader();
-
-                while (kayitokuma.Read())
+                using (OleDbConnection baglantim = new OleDbConnection(baglantiCumlesi))
                 {
-                    kayit_arama_durumu = true;
-                    try
+                    baglantim.Open();
+                    using (OleDbCommand selectsorgu = new OleDbCommand("select * from personeller where tcno=@tcno", baglantim))
                     {
-                        using (Image img = Image.FromFile(Application.StartupPath + "\\personelresimler\\" + kayitokuma.GetValue(0).ToString() + ".jpg"))
+                        selectsorgu.Parameters.AddWithValue("@tcno", maskedTextBox1.Text);
+                        using (OleDbDataReader kayitokuma = selectsorgu.ExecuteReader())
                         {
-                            pictureBox1.Image = new Bitmap(img);
+                            if (kayitokuma.Read())
+                            {
+                                kayit_arama_durumu = true;
+                                try
+                                {
+                                    using (Image img = Image.FromFile(Application.StartupPath + "\\personelresimler\\" + kayitokuma.GetValue(0).ToString() + ".jpg"))
+                                    {
+                                        pictureBox1.Image = new Bitmap(img);
+                                    }
+                                }
+                                catch
+                                {
+                                    using (Image img = Image.FromFile(Application.StartupPath + "\\personelresimler\\resimyok.jpg"))
+                                    {
+                                        pictureBox1.Image = new Bitmap(img);
+                                    }
+                                }
+
+                                label10.Text = kayitokuma.GetValue(1).ToString();
+                                label11.Text = kayitokuma.GetValue(2).ToString();
+
+                                if (kayitokuma.GetValue(3).ToString() == "Bay") label12.Text = "Bay";
+                                else label12.Text = "Bayan";
+
+                                label13.Text = kayitokuma.GetValue(4).ToString();
+                                label14.Text = kayitokuma.GetValue(5).ToString();
+                                label15.Text = kayitokuma.GetValue(6).ToString();
+                                label16.Text = kayitokuma.GetValue(7).ToString();
+                                label17.Text = kayitokuma.GetValue(8).ToString();
+                                label17.Text = string.Format("{0:N2} TL", Convert.ToDouble(kayitokuma.GetValue(8)));
+                            }
                         }
                     }
-                    catch
-                    {
-                        using (Image img = Image.FromFile(Application.StartupPath + "\\personelresimler\\resimyok.jpg"))
-                        {
-                            pictureBox1.Image = new Bitmap(img);
-                        }
-                    }
-
-                    label10.Text = kayitokuma.GetValue(1).ToString();
-                    label11.Text = kayitokuma.GetValue(2).ToString();
-
-                    if (kayitokuma.GetValue(3).ToString() == "Bay")
-                        label12.Text = "Bay";
-                    else
-                        label12.Text = "Bayan";
-
-                    label13.Text = kayitokuma.GetValue(4).ToString();
-                    label14.Text = kayitokuma.GetValue(5).ToString();
-                    label15.Text = kayitokuma.GetValue(6).ToString();
-                    label16.Text = kayitokuma.GetValue(7).ToString();
-                    label17.Text = kayitokuma.GetValue(8).ToString();
-                    label17.Text = string.Format("{0:N2} TL", Convert.ToDouble(kayitokuma.GetValue(8)));
-                    break;
                 }
 
                 if (kayit_arama_durumu == false)
                 {
                     MessageBox.Show("Aranan kayıt bulunamadı!");
                 }
-                baglantim.Close();
             }
             else
             {
