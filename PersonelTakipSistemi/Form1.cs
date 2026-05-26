@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +12,6 @@ using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
 
-
 namespace PersonelTakipSistemi
 {
     public partial class Form1 : Form
@@ -21,10 +20,12 @@ namespace PersonelTakipSistemi
         {
             InitializeComponent();
         }
-        OleDbConnection baglantim = new OleDbConnection(@"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb");
-        public static string tcno, adi, soyadi, yetki;
 
+        string baglantiCumlesi = @"Provider=Microsoft.Ace.OleDb.12.0;Data Source=|DataDirectory|\personel.accdb";
+        public static string tcno, adi, soyadi, yetki;
         int hak = 3;
+        bool durum = false;
+
         private void Form1_Load(object sender, EventArgs e)
         {
             this.Text = "Kullanıcı Girişi";
@@ -33,7 +34,7 @@ namespace PersonelTakipSistemi
             this.ActiveControl = kullaniciaditextbox;
             parolatextbox.PasswordChar = '*';
         }
-        bool durum = false;
+
         private void girisbuton_Click(object sender, EventArgs e)
         {
             durum = false;
@@ -50,29 +51,33 @@ namespace PersonelTakipSistemi
                 {
                     string secilen_yetki = (yoneticiradio.Checked) ? "Yönetici" : "Kullanıcı";
 
-                    baglantim.Open();
-                    string sorgu = "SELECT * FROM kullanicilar WHERE kullaniciadi = @kulAdi AND parola = @sifre AND yetki = @yetki";
-                    OleDbCommand selectsorgu = new OleDbCommand(sorgu, baglantim);
-
-                    selectsorgu.Parameters.AddWithValue("@kulAdi", kullaniciaditextbox.Text);
-                    selectsorgu.Parameters.AddWithValue("@sifre", parolatextbox.Text);
-                    selectsorgu.Parameters.AddWithValue("@yetki", secilen_yetki);
-
-                    OleDbDataReader kayitokuma = selectsorgu.ExecuteReader();
-                    if (kayitokuma.Read())
+                    using (OleDbConnection baglantim = new OleDbConnection(baglantiCumlesi))
                     {
-                        durum = true;
-                        tcno = kayitokuma["tcno"].ToString();
-                        adi = kayitokuma["ad"].ToString();
-                        soyadi = kayitokuma["soyad"].ToString();
-                        yetki = kayitokuma["yetki"].ToString();
+                        baglantim.Open();
+                        string sorgu = "SELECT * FROM kullanicilar WHERE kullaniciadi = @kulAdi AND parola = @sifre AND yetki = @yetki";
+                        using (OleDbCommand selectsorgu = new OleDbCommand(sorgu, baglantim))
+                        {
+                            selectsorgu.Parameters.AddWithValue("@kulAdi", kullaniciaditextbox.Text);
+                            selectsorgu.Parameters.AddWithValue("@sifre", parolatextbox.Text);
+                            selectsorgu.Parameters.AddWithValue("@yetki", secilen_yetki);
+
+                            using (OleDbDataReader kayitokuma = selectsorgu.ExecuteReader())
+                            {
+                                if (kayitokuma.Read())
+                                {
+                                    durum = true;
+                                    tcno = kayitokuma["tcno"].ToString();
+                                    adi = kayitokuma["ad"].ToString();
+                                    soyadi = kayitokuma["soyad"].ToString();
+                                    yetki = kayitokuma["yetki"].ToString();
+                                }
+                            }
+                        }
                     }
-                    baglantim.Close();
                 }
                 catch (Exception hatamsj)
                 {
                     MessageBox.Show("Veritabanı bağlantı hatası: " + hatamsj.Message, "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    if (baglantim.State == ConnectionState.Open) baglantim.Close();
                 }
             }
             else
@@ -81,9 +86,7 @@ namespace PersonelTakipSistemi
                 return;
             }
 
-
             // --- GİRİŞ BAŞARILI / BAŞARISIZ KONTROLÜ VE HAK DÜŞÜRME EKRANI ---
-
             if (durum == true)
             {
                 MessageBox.Show("Giriş Başarılı!", "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -102,24 +105,16 @@ namespace PersonelTakipSistemi
             else
             {
                 hak--;
-                if (hak == 2)
-                {
-                    rbHak1.Visible = false; // İlk yanlışta 3. hak yandı
-                }
-                else if (hak == 1)
-                {
-                    rbHak2.Visible = false; // İkinci yanlışta 2. hak yandı
-                }
+                if (hak == 2) rbHak1.Visible = false;
+                else if (hak == 1) rbHak2.Visible = false;
                 else if (hak == 0)
                 {
-                    rbHak3.Visible = false; // Son hak yandı
-
+                    rbHak3.Visible = false;
                     girisbuton.Enabled = false;
                     MessageBox.Show("Giriş hakkınız kalmadı! Program kapatılıyor.", "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.Exit();
                 }
 
-                // Eğer hala hakkı varsa uyarı verip sadece şifre ve id kutularını temizliyoruz
                 if (hak > 0)
                 {
                     MessageBox.Show("Kullanıcı Adı, Şifre veya Yetki Yanlış!\nKalan Hakkınız: " + hak, "Personel Takip Sistemi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -129,6 +124,7 @@ namespace PersonelTakipSistemi
                 }
             }
         }
+
         private void cikisbuton_Click(object sender, EventArgs e)
         {
             DialogResult cevap = MessageBox.Show("Programdan çıkmak istediğinize emin misiniz?", "Personel Takip Sistemi", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
